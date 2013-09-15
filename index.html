@@ -2,15 +2,67 @@
 <html>
   <head>
     <title>propaganda</title>
+
+    <style>
+rect {
+  fill: none;
+  pointer-events: all;
+  stroke: #444;
+}
+
+.node {
+  stroke-width: 4px;
+  stroke: #000;
+}
+
+.stabile {
+  fill: #0EBFE9;
+}
+
+.unstabile {
+  fill: #FF3030;
+}
+
+#tooltip {
+  position: absolute;
+  width: 370px;
+  height: auto;
+  padding: 10px;
+  color: white;
+  background-color: #272727;
+  -webkit-border-radius: 10px;
+  -moz-border-radius: 10px;
+  border-radius: 10px;
+  -webkit-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+  -moz-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+  box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+}
+
+#tooltip.hidden {
+  display: none;
+}
+
+#tooltip pre {
+  margin: 0;
+  font-size: 16px;
+  line-height: 20px;
+}
+    </style>
   </head>
 
   <body>
 
+    <script src="resources/js/d3.v3.min.js"></script>
     <script src="resources/js/example.js"></script>
 
     <script type="text/javascript">
       example.init();
     </script>
+
+    <div id="tooltip" class="hidden">
+      <pre id="values"></pre>
+    </div>
 
   </body>
 
