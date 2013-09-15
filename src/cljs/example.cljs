@@ -50,7 +50,7 @@
   (string/join
    "\n"
    (for [[k v] (sort m)]
-     (format "%20s %s" (name k) (pretty v)))))
+     (format "%17s %s" (name k) (pretty v)))))
 
 (defn presentation-map
   [system]
@@ -80,7 +80,4 @@
   (let [result-system (building-height)
         chain (reverse (system-chain result-system))
         visualisation (example.components.Visualisation. "body" 960 300)]
-    (.log js/console (clj->js (map presentation-map chain)))
-    (.update visualisation (clj->js (map presentation-map chain)))
-
-    ))
+    (.update visualisation (clj->js (map presentation-map chain)))))

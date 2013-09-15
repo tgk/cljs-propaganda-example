@@ -19,25 +19,25 @@ example.components.Visualisation = function(elem, width, height) {
 
 example.components.Visualisation.prototype.update = function(states) {
 
-  console.log(states);
-
   var scale = d3.scale.linear()
                 .domain([0, states.length - 1])
                 .range([90, this.width - 90]);
 
   this.node = this.node.data(states);
 
+  var tooltipY = this.height / 2 + 22;
+
   this.node.enter()
     .insert("circle", ".node")
     .attr("class", "node")
     .classed("stabile",   function(d) { return  d.stabile; })
     .classed("unstabile", function(d) { return !d.stabile; })
-    .attr("r", function(d) { return d.stabile ? 25 : 15; })
+    .attr("r", function(d) { return d.stabile ? 5 : 4; })
     .attr("cx", function(d, i) { return scale(i); })
     .attr("cy", this.height * 3 / 2)
     .on("mousemove", function(d) {
         var xPosition = d3.select(this).attr("cx") - 170 / 2;
-        var yPosition = d3.select(this).attr("cy");
+        var yPosition = tooltipY;
 
         d3.select("#tooltip")
             .style("left", xPosition + "px")
