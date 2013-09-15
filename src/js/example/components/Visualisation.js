@@ -17,9 +17,9 @@ example.components.Visualisation = function(elem, width, height) {
   this.node = this.svg.selectAll(".node");
 };
 
-example.components.Visualisation.prototype.update = function(states) {
+example.components.Visualisation.prototype.update = function(states, valueArea) {
 
-  var scale = d3.scale.linear()
+  var x = d3.scale.linear()
                 .domain([0, states.length - 1])
                 .range([90, this.width - 90]);
 
@@ -32,8 +32,8 @@ example.components.Visualisation.prototype.update = function(states) {
     .attr("class", "node")
     .classed("stabile",   function(d) { return  d.stabile; })
     .classed("unstabile", function(d) { return !d.stabile; })
-    .attr("r", function(d) { return d.stabile ? 5 : 4; })
-    .attr("cx", function(d, i) { return scale(i); })
+    .attr("r", function(d) { return d.stabile ? 4 : 2; })
+    .attr("cx", function(d, i) { return x(i); })
     .attr("cy", this.height * 3 / 2)
     .on("mousemove", function(d) {
         var xPosition = d3.select(this).attr("cx") - 170 / 2;
@@ -43,7 +43,7 @@ example.components.Visualisation.prototype.update = function(states) {
             .style("left", xPosition + "px")
             .style("top", yPosition + "px");
         d3.select("#tooltip #values")
-            .text(d.values);
+            .text(d.step + "\n" + d.values);
         d3.select("#tooltip").classed("hidden", false);
     })
     .on("mouseout", function() {
@@ -59,6 +59,22 @@ example.components.Visualisation.prototype.update = function(states) {
   this.node
     .transition()
     .duration(1000)
-    .attr("cx", function(d, i) { return scale(i); })
+    .attr("cx", function(d, i) { return x(i); })
     .attr("cy", this.height / 2);
+
+    // Show area of possible values
+
+    var y = d3.scale.linear()
+            .domain([valueArea.values[0][0], valueArea.values[0][1]])
+            .range([20, 100]);
+
+    var valueLine = d3.svg.area()
+            .x(function(d, i) { return x(i + valueArea.offset); })
+            .y0(function(d) { return y(d[0]); })
+            .y1(function(d) { return y(d[1]); })
+            .interpolate("linear");
+
+    this.svg.append("svg:path")
+        .attr("d", valueLine(valueArea.values))
+        .attr("fill", "#c0d9af");
 };

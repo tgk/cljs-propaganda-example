@@ -55,7 +55,27 @@
 (defn presentation-map
   [system]
   {:values (value-str (value-map system))
-   :stabile (stabile? system)})
+   :stabile (stabile? system)
+   :step (or (-> system meta :step) "-")})
+
+(defn add-meta
+  [o k v]
+  (with-meta o (assoc (meta o) k v)))
+
+(defn index-first-map-with-f
+  [ms f]
+  (ffirst
+   (remove (comp nil? second)
+           (map-indexed (fn [i m] [i (f m)]) ms))))
+
+(defn value-area
+  [systems k]
+  (when-let [offset (index-first-map-with-f systems (comp k :values))]
+    {:offset offset
+     :values (for [s (drop offset systems)]
+               (let [v (-> s :values k)]
+                 (if (interval? v) [(:lo v) (:hi v)]
+                     [(- v 0.1) (+ v 0.1)])))}))
 
 (defn building-height
   []
@@ -64,15 +84,26 @@
         audit-system (with-meta system {:audit? true})]
     (-> audit-system
 
+        (add-meta :step :base)
+
+        (add-meta :step :pre-fall-duration-relation)
         (fall-duration :fall-time :building-height)
+
+        (add-meta :step :pre-fall-time)
         (add-value :fall-time (make-interval 2.9 3.1))
 
+        (add-meta :step :pre-similar-triangles-relation)
         (similar-triangles :barometer-shadow :barometer-height
                            :building-shadow :building-height)
+
+        (add-meta :step :pre-building-shadow)
         (add-value :building-shadow (make-interval 54.9 55.1))
+        (add-meta :step :pre-barometer-height)
         (add-value :barometer-height (make-interval 0.3 0.32))
+        (add-meta :step :pre-barometer-shadow)
         (add-value :barometer-shadow (make-interval 0.36 0.37))
 
+        (add-meta :step :pre-building-height)
         (add-value :building-height 45.0))))
 
 (defn ^:export init
@@ -80,4 +111,6 @@
   (let [result-system (building-height)
         chain (reverse (system-chain result-system))
         visualisation (example.components.Visualisation. "body" 960 300)]
-    (.update visualisation (clj->js (map presentation-map chain)))))
+    (.update visualisation
+             (clj->js (map presentation-map chain))
+             (clj->js (value-area chain :barometer-shadow)))))
