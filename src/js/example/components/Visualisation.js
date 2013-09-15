@@ -17,7 +17,7 @@ example.components.Visualisation = function(elem, width, height) {
   this.node = this.svg.selectAll(".node");
 };
 
-example.components.Visualisation.prototype.update = function(states, valueArea) {
+example.components.Visualisation.prototype.update = function(states, valueAreas) {
 
   var x = d3.scale.linear()
                 .domain([0, states.length - 1])
@@ -25,7 +25,7 @@ example.components.Visualisation.prototype.update = function(states, valueArea) 
 
   this.node = this.node.data(states);
 
-  var tooltipY = this.height / 2 + 22;
+  var tooltipY = this.height - 40;
 
   this.node.enter()
     .insert("circle", ".node")
@@ -60,21 +60,41 @@ example.components.Visualisation.prototype.update = function(states, valueArea) 
     .transition()
     .duration(1000)
     .attr("cx", function(d, i) { return x(i); })
-    .attr("cy", this.height / 2);
+    .attr("cy", this.height * 3 / 4);
 
     // Show area of possible values
+    var valueAreaColorScale = d3.scale.category20();
+    var valueAreasCount = 0;
+    for (var p in valueAreas) { valueAreasCount++; }
+    var individualHeight = (200.0 - 20.0) / valueAreasCount;
 
-    var y = d3.scale.linear()
-            .domain([valueArea.values[0][0], valueArea.values[0][1]])
-            .range([20, 100]);
+    var i = 0;
+    for (var name in valueAreas) {
+        var valueArea = valueAreas[name];
 
-    var valueLine = d3.svg.area()
-            .x(function(d, i) { return x(i + valueArea.offset); })
-            .y0(function(d) { return y(d[0]); })
-            .y1(function(d) { return y(d[1]); })
-            .interpolate("linear");
+        var y = d3.scale.linear()
+                .domain([valueArea.values[0][0], valueArea.values[0][1]])
+                .range([20 + i * individualHeight,
+                        20 + (i + 1) * individualHeight]);
 
-    this.svg.append("svg:path")
-        .attr("d", valueLine(valueArea.values))
-        .attr("fill", "#c0d9af");
+        var valueLine = d3.svg.area()
+                .x(function(d, i) { return x(i + valueArea.offset); })
+                .y0(function(d) { return y(d[0]); })
+                .y1(function(d) { return y(d[1]); })
+                .interpolate("linear");
+
+        this.svg.append("svg:path")
+            .attr("id", "valueArea" + name)
+            .attr("d", valueLine(valueArea.values))
+            .attr("opacity", 1)
+            .attr("fill", valueAreaColorScale(name));
+
+        this.svg.append("text")
+            .attr("x", 10)
+            .attr("y", y((valueArea.values[0][0] + valueArea.values[0][1]) / 2))
+            .attr("fill", valueAreaColorScale(name))
+            .text(name);
+
+        i++;
+    }
 };

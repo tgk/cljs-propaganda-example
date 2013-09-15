@@ -77,6 +77,11 @@
                  (if (interval? v) [(:lo v) (:hi v)]
                      [(- v 0.1) (+ v 0.1)])))}))
 
+(defn value-areas
+  [systems]
+  (let [ks (->> systems last :values keys (filter keyword?))]
+    (into {} (for [k ks] [k (value-area systems k)]))))
+
 (defn building-height
   []
   (let [custom-merge (doto (default-merge) extend-merge)
@@ -113,4 +118,4 @@
         visualisation (example.components.Visualisation. "body" 960 300)]
     (.update visualisation
              (clj->js (map presentation-map chain))
-             (clj->js (value-area chain :barometer-shadow)))))
+             (clj->js (value-areas chain)))))
